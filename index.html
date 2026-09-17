@@ -4,10 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tunisia Vegetation Map</title>
-    <link rel="icon" type="image/png" href="assets/icon.png">
+    
+    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
+    <!-- Chart.js (Optional) -->
+    <script src="assets/chart.umd.js"></script>
+
     <style>
         * {
             box-sizing: border-box;
@@ -231,6 +237,13 @@
         });
 
         map.setView([34.0, 9.5], 6);
+
+        // Add OpenStreetMap base tiles to display the world/region map background
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            subdomains: 'abc',
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
 
         let geojsonData = null;
         let csvData = [];
