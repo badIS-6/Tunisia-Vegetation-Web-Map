@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -20,7 +19,6 @@
         body {
             margin: 0;
             font-family: Arial, sans-serif;
-            background: #f5f5f5;
         }
 
         #map {
@@ -57,10 +55,6 @@
             word-break: break-word;
         }
 
-        .governorate {
-            cursor: pointer;
-        }
-
         .error {
             color: #b00020;
             background: #ffecec;
@@ -82,42 +76,56 @@
     <h2>Governorate Data</h2>
 
     <div id="info">
-        <div class="loading">Loading governorates...</div>
+        <div class="loading">
+            Loading governorates...
+        </div>
     </div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<script src="https://unpkg.com/shpjs@5.0.1/dist/shp.js"></script>
+<script src="https://unpkg.com/shpjs@latest/dist/shp.js"></script>
 
 <script>
 
-const map = L.map("map").setView([33.8, 9.5], 6);
+const map = L.map("map").setView(
+    [33.8, 9.5],
+    6
+);
+
 
 L.tileLayer(
     "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
     {
         maxZoom: 18,
-        attribution: "&copy; OpenStreetMap contributors"
+        attribution:
+            "&copy; OpenStreetMap contributors"
     }
 ).addTo(map);
 
 
-const info = document.getElementById("info");
+const info =
+    document.getElementById("info");
 
 
 const BASE_URL =
-    "https://raw.githubusercontent.com/badIS-6/Tunisia-Vegetation-Web-Map/main/Tunisia_shapefiles/";
+    "https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPOSITORY/main/Tunisia_shapefiles/";
 
 
 async function fetchArrayBuffer(url) {
 
-    const response = await fetch(url);
+    const response =
+        await fetch(url);
 
     if (!response.ok) {
+
         throw new Error(
-            "HTTP " + response.status + " while loading " + url
+            "HTTP " +
+            response.status +
+            ": " +
+            url
         );
+
     }
 
     return await response.arrayBuffer();
@@ -126,12 +134,18 @@ async function fetchArrayBuffer(url) {
 
 async function fetchText(url) {
 
-    const response = await fetch(url);
+    const response =
+        await fetch(url);
 
     if (!response.ok) {
+
         throw new Error(
-            "HTTP " + response.status + " while loading " + url
+            "HTTP " +
+            response.status +
+            ": " +
+            url
         );
+
     }
 
     return await response.text();
@@ -143,20 +157,29 @@ async function loadGovernorates() {
     try {
 
         info.innerHTML =
-            '<div class="loading">Loading Tunisia governorates...</div>';
+            '<div class="loading">' +
+            'Loading Tunisia governorates...' +
+            '</div>';
 
 
         const shpURL =
-            BASE_URL + "Tunisia_gov.shp";
+            BASE_URL +
+            "Tunisia_gov.shp";
+
 
         const shxURL =
-            BASE_URL + "Tunisia_gov.shx";
+            BASE_URL +
+            "Tunisia_gov.shx";
+
 
         const dbfURL =
-            BASE_URL + "Tunisia_gov.dbf";
+            BASE_URL +
+            "Tunisia_gov.dbf";
+
 
         const prjURL =
-            BASE_URL + "Tunisia_gov.prj";
+            BASE_URL +
+            "Tunisia_gov.prj";
 
 
         const [
@@ -166,21 +189,62 @@ async function loadGovernorates() {
             prjText
         ] = await Promise.all([
 
-            fetchArrayBuffer(shpURL),
+            fetchArrayBuffer(
+                shpURL
+            ),
 
-            fetchArrayBuffer(shxURL),
+            fetchArrayBuffer(
+                shxURL
+            ),
 
-            fetchArrayBuffer(dbfURL),
+            fetchArrayBuffer(
+                dbfURL
+            ),
 
-            fetchText(prjURL)
+            fetchText(
+                prjURL
+            )
 
         ]);
 
 
-        console.log("SHP loaded:", shpBuffer.byteLength);
-        console.log("SHX loaded:", shxBuffer.byteLength);
-        console.log("DBF loaded:", dbfBuffer.byteLength);
-        console.log("PRJ loaded:", prjText);
+        console.log(
+            "SHP:",
+            shpBuffer.byteLength,
+            "bytes"
+        );
+
+
+        console.log(
+            "SHX:",
+            shxBuffer.byteLength,
+            "bytes"
+        );
+
+
+        console.log(
+            "DBF:",
+            dbfBuffer.byteLength,
+            "bytes"
+        );
+
+
+        console.log(
+            "PRJ:",
+            prjText
+        );
+
+
+        if (
+            typeof shpjs ===
+            "undefined"
+        ) {
+
+            throw new Error(
+                "shpjs library failed to load."
+            );
+
+        }
 
 
         const geometries =
@@ -204,7 +268,7 @@ async function loadGovernorates() {
 
 
         console.log(
-            "GeoJSON generated:",
+            "GeoJSON:",
             geojson
         );
 
@@ -214,27 +278,33 @@ async function loadGovernorates() {
             !geojson.features ||
             geojson.features.length === 0
         ) {
+
             throw new Error(
-                "The shapefile was loaded but contains no features."
+                "The shapefile contains no features."
             );
+
         }
 
 
-        const governorateLayer =
+        let governorateLayer;
+
+
+        governorateLayer =
             L.geoJSON(
                 geojson,
                 {
 
-                    style: function () {
+                    style:
+                        function () {
 
-                        return {
-                            color: "#333",
-                            weight: 1,
-                            fillColor: "#3388ff",
-                            fillOpacity: 0.25
-                        };
+                            return {
+                                color: "#333",
+                                weight: 1,
+                                fillColor: "#3388ff",
+                                fillOpacity: 0.25
+                            };
 
-                    },
+                        },
 
 
                     onEachFeature:
@@ -246,7 +316,9 @@ async function loadGovernorates() {
                             layer.on({
 
                                 mouseover:
-                                    function (event) {
+                                    function (
+                                        event
+                                    ) {
 
                                         event.target.setStyle({
                                             weight: 2,
@@ -257,7 +329,9 @@ async function loadGovernorates() {
 
 
                                 mouseout:
-                                    function (event) {
+                                    function (
+                                        event
+                                    ) {
 
                                         governorateLayer.resetStyle(
                                             event.target
@@ -269,7 +343,7 @@ async function loadGovernorates() {
                                 click:
                                     function () {
 
-                                        displayGovernorateData(
+                                        showGovernorate(
                                             feature.properties
                                         );
 
@@ -280,7 +354,12 @@ async function loadGovernorates() {
                         }
 
                 }
-            ).addTo(map);
+            );
+
+
+        governorateLayer.addTo(
+            map
+        );
 
 
         map.fitBounds(
@@ -289,38 +368,44 @@ async function loadGovernorates() {
 
 
         info.innerHTML =
-            "<p>Click a governorate on the map.</p>";
+            "<p>" +
+            "Click a governorate on the map." +
+            "</p>";
 
 
     } catch (error) {
 
         console.error(
-            "Shapefile loading error:",
+            "SHAPEFILE ERROR:",
             error
         );
 
 
-        info.innerHTML = `
-            <div class="error">
-                <strong>Shapefile Error</strong>
-                <p>
-                    Could not load the Tunisia governorate
-                    shapefile.
-                </p>
-                <p>
-                    ${error.message}
-                </p>
-            </div>
-        `;
+        info.innerHTML =
+            '<div class="error">' +
+
+            "<strong>" +
+            "Shapefile Error" +
+            "</strong>" +
+
+            "<p>" +
+            error.message +
+            "</p>" +
+
+            "</div>";
 
     }
 
 }
 
 
-function displayGovernorateData(properties) {
+function showGovernorate(
+    properties
+) {
 
-    if (!properties) {
+    if (
+        !properties
+    ) {
 
         info.innerHTML =
             "<p>No attribute data available.</p>";
@@ -331,34 +416,34 @@ function displayGovernorateData(properties) {
 
 
     let html =
-        "<h3>Governorate</h3>";
+        "<h3>Governorate Data</h3>";
 
 
-    for (
-        const key in properties
-    ) {
-
-        if (
-            Object.prototype.hasOwnProperty.call(
-                properties,
-                key
-            )
-        ) {
+    Object.keys(
+        properties
+    ).forEach(
+        function (key) {
 
             html +=
                 "<p>" +
+
                 "<strong>" +
                 key +
                 ":</strong> " +
-                properties[key] +
+
+                (
+                    properties[key] ??
+                    ""
+                ) +
+
                 "</p>";
 
         }
+    );
 
-    }
 
-
-    info.innerHTML = html;
+    info.innerHTML =
+        html;
 
 }
 
@@ -369,4 +454,3 @@ loadGovernorates();
 
 </body>
 </html>
-```
