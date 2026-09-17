@@ -16,6 +16,8 @@ The main objectives of the project are:
 
 ## Data Used
 * Tunisia's vegetation data `tunisia_ndvi.csv`. Source (edited): https://github.com/badIS-6/Drought-Early-Warning-System/blob/main/GEE-output/tunisia_drought_latest.csv
+Indicators:
+** ndvi	ndvi_anomaly	pet_mm	rainfall_mm	soil_moisture	soil_moisture_anomaly	soil_moisture_anomaly_pct	tci	vci	vhi	year
 * OpenStreaMap as the base map to provide geographic context. Credit: https://www.openstreetmap.org/#map=6/33.87/9.29
 * Geographic boundaries of Tunisia's governorates `Tunisia_shapefiles`. Source: https://www.igismap.com/
 
@@ -43,4 +45,5 @@ This project provides an interactive geographic platform for exploring Tunisia's
 * Sarah Bouzidi
 * Badis Zammouri
 * Mohamed Chandoul
+  
 As part of a school project - Web mapping - **Manouba School of Engineering*
