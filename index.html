@@ -355,41 +355,22 @@ function findGovernorateData(properties) {
         return null;
     }
 
+    // Check every attribute contained in the shapefile feature
+    for (const value of Object.values(properties)) {
 
-    // Try several possible shapefile property names.
-    const possibleNames = [
-
-        properties.governorate_name,
-        properties.Governorate,
-        properties.governorate,
-        properties.GOV_NAME,
-        properties.GOVERNORATE,
-        properties.NAME_1,
-        properties.NAME,
-        properties.Name,
-        properties.name,
-        properties.NOM
-    ];
-
-
-    for (const name of possibleNames) {
-
-        if (!name) {
+        if (value === null || value === undefined) {
             continue;
         }
 
-        const key = canonicalGovernorateName(name);
+        const key = canonicalGovernorateName(value);
 
         if (governorateData[key]) {
-
             return governorateData[key];
         }
     }
 
-
     return null;
 }
-
 
 // =========================================================
 // LOAD GOVERNORATES
@@ -529,47 +510,22 @@ async function loadGovernorates() {
 function showGovernorate(properties) {
 
     if (!properties) {
-
-        info.innerHTML =
-            "<p>No attribute data available.</p>";
-
+        info.innerHTML = "<p>No attribute data available.</p>";
         return;
     }
 
+    const governorateName = getGovernorateName(properties);
 
-    // Find corresponding CSV row
-    const data =
-        findGovernorateData(properties);
+    let html = "<h3>" + governorateName + "</h3>";
 
-
-    // Try to determine governorate name
-    const shapefileName =
-        properties.governorate_name ||
-        properties.Governorate ||
-        properties.governorate ||
-        properties.GOV_NAME ||
-        properties.GOVERNORATE ||
-        properties.NAME_1 ||
-        properties.NAME ||
-        properties.Name ||
-        properties.name ||
-        properties.NOM ||
-        "Unknown";
-
-
-    let html =
-        "<h3>" +
-        shapefileName +
-        "</h3>";
-
+    const data = findGovernorateData(properties);
 
     if (!data) {
 
         html +=
             '<div class="error">' +
             "<strong>No CSV data found.</strong>" +
-            "<p>Could not match this governorate " +
-            "with the CSV data.</p>" +
+            "<p>Could not match this governorate with the CSV data.</p>" +
             "</div>";
 
         info.innerHTML = html;
@@ -582,80 +538,46 @@ function showGovernorate(properties) {
         return;
     }
 
-
-    // -----------------------------------------------------
-    // CSV VARIABLES TO DISPLAY
-    // -----------------------------------------------------
-
     const fields = [
-
         ["NDVI", "ndvi"],
-
         ["NDVI Anomaly", "ndvi_anomaly"],
-
         ["PET (mm)", "pet_mm"],
-
         ["Rainfall (mm)", "rainfall_mm"],
-
         ["Soil Moisture", "soil_moisture"],
-
-        ["Soil Moisture Anomaly",
-            "soil_moisture_anomaly"],
-
-        ["Soil Moisture Anomaly (%)",
-            "soil_moisture_anomaly_pct"],
-
+        ["Soil Moisture Anomaly", "soil_moisture_anomaly"],
+        ["Soil Moisture Anomaly (%)", "soil_moisture_anomaly_pct"],
         ["TCI", "tci"],
-
         ["VCI", "vci"],
-
         ["VHI", "vhi"]
     ];
-
 
     fields.forEach(function(field) {
 
         const label = field[0];
-
         const key = field[1];
 
         let value = data[key];
-
 
         if (
             value === undefined ||
             value === null ||
             value === ""
         ) {
-
             value = "N/A";
-
-        } else if (!isNaN(value)) {
-
-            value =
-                Number(value).toFixed(4);
+        }
+        else if (!isNaN(value)) {
+            value = Number(value).toFixed(4);
         }
 
-
         html +=
-
             '<div class="data-row">' +
-
-            "<strong>" +
-            label +
-            "</strong>" +
-
-            "<span>" +
-            value +
-            "</span>" +
-
+            "<strong>" + label + "</strong>" +
+            "<span>" + value + "</span>" +
             "</div>";
     });
 
-
     info.innerHTML = html;
 }
-
 
 // =========================================================
 // START
