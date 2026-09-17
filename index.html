@@ -138,6 +138,8 @@
 
     <h2>Governorate Data</h2>
 
+    <a href="variables.html" target="_blank">Variable Explanations</a>
+
     <div id="info">
 
         <div class="loading">
@@ -173,9 +175,7 @@
 <script>
 
 
-// =========================================================
-// MAP
-// =========================================================
+
 
 const map = L.map("map").setView(
     [33.8, 9.5],
@@ -195,25 +195,17 @@ L.tileLayer(
 const info = document.getElementById("info");
 
 
-// =========================================================
-// DATA SOURCES
-// =========================================================
 
-// Shapefile source
 const BASE_URL =
     "https://raw.githubusercontent.com/badIS-6/Tunisia-Vegetation-Web-Map/main/Tunisia_shapefiles/";
 
-// CSV source
 const CSV_URL = "tunisia_ndvi.csv";
 
 
-// Stores CSV data indexed by normalized governorate name
 let governorateData = {};
 
 
-// =========================================================
-// NORMALIZE GOVERNORATE NAMES
-// =========================================================
+
 
 function normalizeGovernorateName(name) {
 
@@ -237,9 +229,7 @@ function normalizeGovernorateName(name) {
 }
 
 
-// =========================================================
-// EXPLICIT ALIASES FOR TUNISIAN GOVERNORATES
-// =========================================================
+
 
 const governorateAliases = {
 
@@ -302,9 +292,7 @@ const governorateAliases = {
 };
 
 
-// =========================================================
-// CREATE CANONICAL GOVERNORATE NAME
-// =========================================================
+
 
 function canonicalGovernorateName(name) {
 
@@ -322,9 +310,6 @@ function canonicalGovernorateName(name) {
 }
 
 
-// =========================================================
-// CSV PARSER
-// =========================================================
 
 function parseCSVLine(line) {
 
@@ -429,9 +414,6 @@ function parseCSV(text) {
 }
 
 
-// =========================================================
-// LOAD CSV DATA
-// =========================================================
 
 async function loadCSVData() {
 
@@ -497,9 +479,6 @@ async function loadCSVData() {
 }
 
 
-// =========================================================
-// FIND CSV DATA FOR SHAPEFILE GOVERNORATE
-// =========================================================
 
 function findGovernorateData(properties) {
 
@@ -508,8 +487,7 @@ function findGovernorateData(properties) {
     }
 
 
-    // Check every attribute contained
-    // in the shapefile feature
+    
 
     for (
         const value of Object.values(properties)
@@ -541,9 +519,7 @@ function findGovernorateData(properties) {
 }
 
 
-// =========================================================
-// GET GOVERNORATE NAME
-// =========================================================
+
 
 function getGovernorateName(properties) {
 
@@ -583,9 +559,7 @@ function getGovernorateName(properties) {
 }
 
 
-// =========================================================
-// GET NDVI VALUE
-// =========================================================
+
 
 function getNDVI(properties) {
 
@@ -612,9 +586,7 @@ function getNDVI(properties) {
 }
 
 
-// =========================================================
-// NDVI COLOR
-// =========================================================
+
 
 function getNDVIColor(ndvi) {
 
@@ -629,13 +601,7 @@ function getNDVIColor(ndvi) {
     }
 
 
-    /*
-        NDVI scale:
-
-        -1.0 = red
-         0.0 = yellow
-         1.0 = green
-    */
+    
 
 
     let value = Math.max(
@@ -644,7 +610,6 @@ function getNDVIColor(ndvi) {
     );
 
 
-    // Convert -1 → 1 into 0 → 1
 
     let ratio =
         (value + 1) / 2;
@@ -656,7 +621,6 @@ function getNDVIColor(ndvi) {
 
     if (ratio < 0.5) {
 
-        // Red → Yellow
 
         const t = ratio * 2;
 
@@ -670,7 +634,6 @@ function getNDVIColor(ndvi) {
 
     else {
 
-        // Yellow → Green
 
         const t =
             (ratio - 0.5) * 2;
@@ -695,9 +658,7 @@ function getNDVIColor(ndvi) {
 }
 
 
-// =========================================================
-// LOAD GOVERNORATES
-// =========================================================
+
 
 async function loadGovernorates() {
 
@@ -709,16 +670,12 @@ async function loadGovernorates() {
             "</div>";
 
 
-        // -------------------------------------------------
-        // LOAD CSV FIRST
-        // -------------------------------------------------
+       
 
         await loadCSVData();
 
 
-        // -------------------------------------------------
-        // ORIGINAL SHAPEFILE MECHANISM
-        // -------------------------------------------------
+        
 
         if (typeof shp === "undefined") {
 
@@ -747,9 +704,7 @@ async function loadGovernorates() {
         }
 
 
-        // -------------------------------------------------
-        // CREATE GOVERNORATE LAYER
-        // -------------------------------------------------
+        
 
         let governorateLayer;
 
@@ -758,10 +713,7 @@ async function loadGovernorates() {
             geojson,
             {
 
-                // -----------------------------------------
-                // STYLE
-                // -----------------------------------------
-
+                
                 style: function(feature) {
 
                     const ndvi =
@@ -786,9 +738,7 @@ async function loadGovernorates() {
                 },
 
 
-                // -----------------------------------------
-                // INTERACTION
-                // -----------------------------------------
+                
 
                 onEachFeature:
                     function(feature, layer) {
@@ -796,9 +746,7 @@ async function loadGovernorates() {
 
                     layer.on({
 
-                        // -----------------------------
-                        // MOUSE OVER
-                        // -----------------------------
+                        
 
                         mouseover:
                             function(event) {
@@ -814,9 +762,7 @@ async function loadGovernorates() {
                         },
 
 
-                        // -----------------------------
-                        // MOUSE OUT
-                        // -----------------------------
+                        
 
                         mouseout:
                             function(event) {
@@ -829,9 +775,7 @@ async function loadGovernorates() {
                         },
 
 
-                        // -----------------------------
-                        // CLICK
-                        // -----------------------------
+                        
 
                         click:
                             function() {
@@ -850,12 +794,10 @@ async function loadGovernorates() {
         );
 
 
-        // Add layer to map
 
         governorateLayer.addTo(map);
 
 
-        // Zoom to Tunisia
 
         map.fitBounds(
             governorateLayer.getBounds()
@@ -894,9 +836,7 @@ async function loadGovernorates() {
 }
 
 
-// =========================================================
-// DISPLAY GOVERNORATE DATA
-// =========================================================
+
 
 function showGovernorate(properties) {
 
@@ -924,9 +864,7 @@ function showGovernorate(properties) {
         findGovernorateData(properties);
 
 
-    // -----------------------------------------------------
-    // NO MATCH
-    // -----------------------------------------------------
+    
 
     if (!data) {
 
@@ -960,9 +898,7 @@ function showGovernorate(properties) {
     }
 
 
-    // -----------------------------------------------------
-    // FIELDS TO DISPLAY
-    // -----------------------------------------------------
+    
 
     const fields = [
 
@@ -995,9 +931,7 @@ function showGovernorate(properties) {
     ];
 
 
-    // -----------------------------------------------------
-    // DISPLAY EACH FIELD
-    // -----------------------------------------------------
+    
 
     fields.forEach(
         function(field) {
@@ -1049,16 +983,14 @@ function showGovernorate(properties) {
     );
 
 
-    // Display information
+    
 
     info.innerHTML = html;
 
 }
 
 
-// =========================================================
-// START APPLICATION
-// =========================================================
+
 
 loadGovernorates();
 
