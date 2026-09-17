@@ -8,8 +8,6 @@ The system provides a foundation for developing a more comprehensive drought mon
 
 ## Objectives
 
-The main objectives of the project are:
-
 * To visualize governorate-level **vegetation** information.
 * To allow users to interact with and select individual governorates.
 * To display available attributes for each governorate.
@@ -17,7 +15,7 @@ The main objectives of the project are:
 ## Data Used
 * Tunisia's vegetation data `tunisia_ndvi.csv`. Source (edited): https://github.com/badIS-6/Drought-Early-Warning-System/blob/main/GEE-output/tunisia_drought_latest.csv
   
-Main indicators: NDVI, NDVI anomaly, Rainfall, VCI, VHI...
+Main indicators: NDVI, NDVI anomaly, Rainfall, VCI, VHI... explained in detail in `variables.html`
     
 * OpenStreaMap as the base map to provide geographic context. Credit: https://www.openstreetmap.org/#map=6/33.87/9.29
 * Geographic boundaries of Tunisia's governorates `Tunisia_shapefiles`. Source: https://www.igismap.com/
@@ -30,7 +28,7 @@ Main indicators: NDVI, NDVI anomaly, Rainfall, VCI, VHI...
 | `Tunisia_gov.prj` | Contains the coordinate reference system information                |
 
 
-The geographic data is hosted and deplyoed in a GitHub repository. Link: https://badis-6.github.io/Tunisia-Vegetation-Web-Map/
+The geographic data is hosted and deployed in a GitHub repository. Link: https://badis-6.github.io/Tunisia-Vegetation-Web-Map/
 
 ## The Expected Result
 
