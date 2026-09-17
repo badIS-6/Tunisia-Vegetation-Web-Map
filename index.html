@@ -235,7 +235,6 @@
 
         map.setView([34.0, 9.5], 6);
 
-        // Add OpenStreetMap base tiles to display the world/region map background
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             subdomains: 'abc',
@@ -321,11 +320,13 @@
             return isNaN(date.getTime()) ? null : date;
         }
 
-        function getLatestRecordForGovernor(code) {
+        // Updated match logic: uses the 'gouv_fr' string to join CSV and GeoJSON
+        function getLatestRecordForGovernor(name) {
+            if (!name) return null;
             const matches = csvData.filter(row => {
-                const csvCode = String(row.pcode || "").trim().toUpperCase();
-                const admLevel = String(row.adm_level || "").trim();
-                return csvCode === code && admLevel === "2";
+                const csvName = String(row.gouv_fr || "").trim().toLowerCase();
+                const targetName = String(name).trim().toLowerCase();
+                return csvName === targetName;
             });
 
             if (matches.length > 0) {
@@ -360,8 +361,8 @@
 
         function governorateStyle(feature) {
             const properties = feature.properties || {};
-            const code = String(properties.gouv_id || "").trim().toUpperCase();
-            const record = getLatestRecordForGovernor(code);
+            const name = properties.gouv_fr || "Unknown";
+            const record = getLatestRecordForGovernor(name); // Join by Name
             let vim = record ? parseFloat(record.vim) : null;
 
             return {
@@ -392,10 +393,10 @@
         function selectGovernorate(event) {
             const feature = event.target.feature;
             const properties = feature.properties || {};
-            const code = String(properties.gouv_id || "").trim().toUpperCase();
+            const code = String(properties.gouv_id || "Unknown").trim().toUpperCase();
             const name = properties.gouv_fr || "Unknown";
             const arabic = properties.gouv_ar || "";
-            const record = getLatestRecordForGovernor(code);
+            const record = getLatestRecordForGovernor(name); // Join by Name
 
             map.fitBounds(event.target.getBounds(), { padding: [30, 30] });
 
@@ -461,8 +462,7 @@
             const properties = feature.properties || {};
             const name = properties.gouv_fr || "Unknown";
             const arabic = properties.gouv_ar || "";
-            const code = String(properties.gouv_id || "").trim().toUpperCase();
-            const record = getLatestRecordForGovernor(code);
+            const record = getLatestRecordForGovernor(name); // Join by Name
 
             let tooltipText = `<b>${name}</b>`;
             if (arabic) tooltipText += `<br>${arabic}`;
