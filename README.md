@@ -30,7 +30,7 @@ Main indicators: NDVI, NDVI anomaly, Rainfall, VCI, VHI...
 | `Tunisia_gov.prj` | Contains the coordinate reference system information                |
 
 
-The geographic data is hosted and deplyoed in a GitHub repository. Link: https: https://badis-6.github.io/Tunisia-Vegetation-Web-Map/
+The geographic data is hosted and deplyoed in a GitHub repository. Link: https://badis-6.github.io/Tunisia-Vegetation-Web-Map/
 
 ## The Expected Result
 
