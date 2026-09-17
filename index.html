@@ -1,65 +1,87 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tunisia Drought Early Warning System</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-    <style>
-        * {
-            box-sizing: border-box;
-        }
 
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-        }
+```
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
-        #map {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 350px;
-            bottom: 0;
-        }
+<style>
+    * {
+        box-sizing: border-box;
+    }
 
-        #sidebar {
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 350px;
-            height: 100vh;
-            background: white;
-            padding: 20px;
-            overflow-y: auto;
-            box-shadow: -2px 0 8px rgba(0, 0, 0, 0.15);
-            z-index: 1000;
-        }
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+    }
 
-        #sidebar h2 {
-            margin-top: 0;
-        }
+    #map {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 350px;
+        bottom: 0;
+    }
 
-        #info {
-            margin-top: 20px;
-            padding: 15px;
-            background: #f3f3f3;
-            border-radius: 6px;
-            line-height: 1.5;
-            word-break: break-word;
-        }
+    #sidebar {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 350px;
+        height: 100vh;
+        background: white;
+        padding: 20px;
+        overflow-y: auto;
+        box-shadow: -2px 0 8px rgba(0, 0, 0, 0.15);
+        z-index: 1000;
+    }
 
-        .error {
-            color: #b00020;
-            background: #ffecec;
-            padding: 12px;
-            border-radius: 6px;
-        }
+    #sidebar h2 {
+        margin-top: 0;
+    }
 
-        .loading {
-            color: #555;
-        }
-    </style>
+    #info {
+        margin-top: 20px;
+        padding: 15px;
+        background: #f3f3f3;
+        border-radius: 6px;
+        line-height: 1.5;
+        word-break: break-word;
+    }
+
+    #info h3 {
+        margin-top: 0;
+    }
+
+    .data-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 7px 0;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .data-row strong {
+        color: #333;
+    }
+
+    .error {
+        color: #b00020;
+        background: #ffecec;
+        padding: 12px;
+        border-radius: 6px;
+    }
+
+    .loading {
+        color: #555;
+    }
+</style>
+```
+
 </head>
 
 <body>
@@ -68,15 +90,23 @@
 
 <div id="sidebar">
     <h2>Governorate Data</h2>
-    <div id="info">
-        <div class="loading">Loading governorates...</div>
+
+```
+<div id="info">
+    <div class="loading">
+        Loading governorates...
     </div>
+</div>
+```
+
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <script src="https://cdn.jsdelivr.net/npm/shpjs@latest/dist/shp.js"></script>
-    
+
 <script>
+
 const map = L.map("map").setView([33.8, 9.5], 6);
 
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -85,76 +115,554 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
 }).addTo(map);
 
 const info = document.getElementById("info");
-const BASE_URL = "https://raw.githubusercontent.com/badIS-6/Tunisia-Vegetation-Web-Map/main/Tunisia_shapefiles/";
 
-async function loadGovernorates() {
-    try {
-        info.innerHTML = '<div class="loading">Loading Tunisia governorates...</div>';
+const BASE_URL =
+    "https://raw.githubusercontent.com/badIS-6/Tunisia-Vegetation-Web-Map/main/Tunisia_shapefiles/";
 
-        // Check for the correct global variable exported by the library
-        if (typeof shp === "undefined") {
-            throw new Error("shp library failed to load.");
+// CSV file
+const CSV_URL = "tunisia_ndvi.csv";
+
+// Stores CSV data indexed by normalized governorate name
+let governorateData = {};
+
+
+// =========================================================
+// NORMALIZE GOVERNORATE NAMES
+// =========================================================
+
+function normalizeGovernorateName(name) {
+
+    if (!name) {
+        return "";
+    }
+
+    return name
+        .toString()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "") // remove accents
+        .toLowerCase()
+        .replace(/['’`-]/g, " ")
+        .replace(/\bgovernorate\b/g, "")
+        .replace(/\bdelegation\b/g, "")
+        .replace(/\bgouvernorat\b/g, "")
+        .replace(/\bgouvernorat de\b/g, "")
+        .replace(/\bla\b/g, "")
+        .replace(/\ble\b/g, "")
+        .replace(/\bel\b/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
+
+// =========================================================
+// EXPLICIT ALIASES FOR TUNISIAN GOVERNORATES
+// =========================================================
+
+const governorateAliases = {
+
+    "tunis": "tunis",
+
+    "ariana": "ariana",
+
+    "ben arous": "ben arous",
+
+    "manouba": "manouba",
+
+    "la manouba": "manouba",
+
+    "nabeul": "nabeul",
+
+    "bizerte": "bizerte",
+
+    "beja": "beja",
+
+    "jendouba": "jendouba",
+
+    "kef": "kef",
+    "le kef": "kef",
+    "el kef": "kef",
+
+    "siliana": "siliana",
+
+    "zaghouan": "zaghouan",
+
+    "sousse": "sousse",
+
+    "monastir": "monastir",
+
+    "mahdia": "mahdia",
+
+    "kairouan": "kairouan",
+
+    "kasserine": "kasserine",
+
+    "sidi bouzid": "sidi bouzid",
+    "sidi bou zid": "sidi bouzid",
+
+    "sfax": "sfax",
+
+    "gabes": "gabes",
+
+    "medenine": "medenine",
+
+    "tataouine": "tataouine",
+
+    "gafsa": "gafsa",
+
+    "tozeur": "tozeur",
+
+    "kebili": "kebili"
+};
+
+
+function canonicalGovernorateName(name) {
+
+    const normalized = normalizeGovernorateName(name);
+
+    if (governorateAliases[normalized]) {
+        return governorateAliases[normalized];
+    }
+
+    return normalized;
+}
+
+
+// =========================================================
+// CSV PARSER
+// =========================================================
+
+function parseCSVLine(line) {
+
+    const result = [];
+
+    let current = "";
+    let insideQuotes = false;
+
+    for (let i = 0; i < line.length; i++) {
+
+        const char = line[i];
+
+        if (char === '"' && line[i + 1] === '"') {
+
+            current += '"';
+            i++;
+
+        } else if (char === '"') {
+
+            insideQuotes = !insideQuotes;
+
+        } else if (char === "," && !insideQuotes) {
+
+            result.push(current);
+            current = "";
+
+        } else {
+
+            current += char;
+        }
+    }
+
+    result.push(current);
+
+    return result;
+}
+
+
+function parseCSV(text) {
+
+    const lines = text.trim().split(/\r?\n/);
+
+    const headers = parseCSVLine(lines[0]);
+
+    const rows = [];
+
+    for (let i = 1; i < lines.length; i++) {
+
+        if (!lines[i].trim()) {
+            continue;
         }
 
-        // shp() automatically fetches the .shp, .dbf, .shx, and .prj files when provided the base URL
-        const geojson = await shp(BASE_URL + "Tunisia_gov");
+        const values = parseCSVLine(lines[i]);
 
-        if (!geojson || !geojson.features || geojson.features.length === 0) {
-            throw new Error("The shapefile contains no features.");
-        }
+        const row = {};
 
-        const governorateLayer = L.geoJSON(geojson, {
-            style: function () {
-                return {
-                    color: "#333",
-                    weight: 1,
-                    fillColor: "#3388ff",
-                    fillOpacity: 0.25
-                };
-            },
-            onEachFeature: function (feature, layer) {
-                layer.on({
-                    mouseover: function (event) {
-                        event.target.setStyle({
-                            weight: 2,
-                            fillOpacity: 0.45
-                        });
-                    },
-                    mouseout: function (event) {
-                        governorateLayer.resetStyle(event.target);
-                    },
-                    click: function () {
-                        showGovernorate(feature.properties);
-                    }
-                });
-            }
+        headers.forEach(function(header, index) {
+
+            row[header.trim()] = values[index] ?? "";
+
         });
 
+        rows.push(row);
+    }
+
+    return rows;
+}
+
+
+// =========================================================
+// LOAD CSV DATA
+// =========================================================
+
+async function loadCSVData() {
+
+    const response = await fetch(CSV_URL);
+
+    if (!response.ok) {
+
+        throw new Error(
+            "Could not load CSV file: " + response.status
+        );
+    }
+
+    const csvText = await response.text();
+
+    const rows = parseCSV(csvText);
+
+    if (!rows.length) {
+
+        throw new Error("CSV file contains no data.");
+    }
+
+
+    rows.forEach(function(row) {
+
+        const name = row["governorate_name"];
+
+        if (!name) {
+            return;
+        }
+
+        const key = canonicalGovernorateName(name);
+
+        governorateData[key] = row;
+    });
+
+
+    console.log(
+        "Loaded governorates from CSV:",
+        Object.keys(governorateData)
+    );
+}
+
+
+// =========================================================
+// FIND CSV DATA FOR A SHAPEFILE GOVERNORATE
+// =========================================================
+
+function findGovernorateData(properties) {
+
+    if (!properties) {
+        return null;
+    }
+
+
+    // Try several possible shapefile property names.
+    const possibleNames = [
+
+        properties.governorate_name,
+        properties.Governorate,
+        properties.governorate,
+        properties.GOV_NAME,
+        properties.GOVERNORATE,
+        properties.NAME_1,
+        properties.NAME,
+        properties.Name,
+        properties.name,
+        properties.NOM
+    ];
+
+
+    for (const name of possibleNames) {
+
+        if (!name) {
+            continue;
+        }
+
+        const key = canonicalGovernorateName(name);
+
+        if (governorateData[key]) {
+
+            return governorateData[key];
+        }
+    }
+
+
+    return null;
+}
+
+
+// =========================================================
+// LOAD GOVERNORATES
+// =========================================================
+
+async function loadGovernorates() {
+
+    try {
+
+        info.innerHTML =
+            '<div class="loading">Loading governorates...</div>';
+
+
+        // Load CSV first
+        await loadCSVData();
+
+
+        // -------------------------------------------------
+        // ORIGINAL SHAPEFILE MECHANISM
+        // -------------------------------------------------
+
+        if (typeof shp === "undefined") {
+
+            throw new Error(
+                "shp library failed to load."
+            );
+        }
+
+
+        const geojson = await shp(
+            BASE_URL + "Tunisia_gov"
+        );
+
+
+        if (
+            !geojson ||
+            !geojson.features ||
+            geojson.features.length === 0
+        ) {
+
+            throw new Error(
+                "The shapefile contains no features."
+            );
+        }
+
+
+        const governorateLayer = L.geoJSON(
+            geojson,
+            {
+
+                style: function(feature) {
+
+                    return {
+                        color: "#333",
+                        weight: 1,
+                        fillColor: "#3388ff",
+                        fillOpacity: 0.25
+                    };
+
+                },
+
+
+                onEachFeature: function(
+                    feature,
+                    layer
+                ) {
+
+                    layer.on({
+
+                        mouseover: function(event) {
+
+                            event.target.setStyle({
+
+                                weight: 2,
+
+                                fillOpacity: 0.45
+                            });
+                        },
+
+
+                        mouseout: function(event) {
+
+                            governorateLayer.resetStyle(
+                                event.target
+                            );
+                        },
+
+
+                        click: function() {
+
+                            showGovernorate(
+                                feature.properties
+                            );
+                        }
+
+                    });
+
+                }
+
+            }
+        );
+
+
         governorateLayer.addTo(map);
-        map.fitBounds(governorateLayer.getBounds());
-        info.innerHTML = "<p>Click a governorate on the map.</p>";
+
+        map.fitBounds(
+            governorateLayer.getBounds()
+        );
+
+
+        info.innerHTML =
+            "<p>Click a governorate on the map.</p>";
+
 
     } catch (error) {
-        console.error("SHAPEFILE ERROR:", error);
-        info.innerHTML = '<div class="error"><strong>Shapefile Error</strong><p>' + error.message + '</p></div>';
+
+        console.error(
+            "ERROR:",
+            error
+        );
+
+        info.innerHTML =
+            '<div class="error">' +
+            '<strong>Loading Error</strong>' +
+            '<p>' +
+            error.message +
+            '</p>' +
+            '</div>';
     }
 }
 
+
+// =========================================================
+// DISPLAY GOVERNORATE DATA
+// =========================================================
+
 function showGovernorate(properties) {
+
     if (!properties) {
-        info.innerHTML = "<p>No attribute data available.</p>";
+
+        info.innerHTML =
+            "<p>No attribute data available.</p>";
+
         return;
     }
 
-    let html = "<h3>Governorate Data</h3>";
-    Object.keys(properties).forEach(function (key) {
-        html += "<p><strong>" + key + ":</strong> " + (properties[key] ?? "") + "</p>";
+
+    // Find corresponding CSV row
+    const data =
+        findGovernorateData(properties);
+
+
+    // Try to determine governorate name
+    const shapefileName =
+        properties.governorate_name ||
+        properties.Governorate ||
+        properties.governorate ||
+        properties.GOV_NAME ||
+        properties.GOVERNORATE ||
+        properties.NAME_1 ||
+        properties.NAME ||
+        properties.Name ||
+        properties.name ||
+        properties.NOM ||
+        "Unknown";
+
+
+    let html =
+        "<h3>" +
+        shapefileName +
+        "</h3>";
+
+
+    if (!data) {
+
+        html +=
+            '<div class="error">' +
+            "<strong>No CSV data found.</strong>" +
+            "<p>Could not match this governorate " +
+            "with the CSV data.</p>" +
+            "</div>";
+
+        info.innerHTML = html;
+
+        console.warn(
+            "No CSV match for shapefile properties:",
+            properties
+        );
+
+        return;
+    }
+
+
+    // -----------------------------------------------------
+    // CSV VARIABLES TO DISPLAY
+    // -----------------------------------------------------
+
+    const fields = [
+
+        ["NDVI", "ndvi"],
+
+        ["NDVI Anomaly", "ndvi_anomaly"],
+
+        ["PET (mm)", "pet_mm"],
+
+        ["Rainfall (mm)", "rainfall_mm"],
+
+        ["Soil Moisture", "soil_moisture"],
+
+        ["Soil Moisture Anomaly",
+            "soil_moisture_anomaly"],
+
+        ["Soil Moisture Anomaly (%)",
+            "soil_moisture_anomaly_pct"],
+
+        ["TCI", "tci"],
+
+        ["VCI", "vci"],
+
+        ["VHI", "vhi"]
+    ];
+
+
+    fields.forEach(function(field) {
+
+        const label = field[0];
+
+        const key = field[1];
+
+        let value = data[key];
+
+
+        if (
+            value === undefined ||
+            value === null ||
+            value === ""
+        ) {
+
+            value = "N/A";
+
+        } else if (!isNaN(value)) {
+
+            value =
+                Number(value).toFixed(4);
+        }
+
+
+        html +=
+
+            '<div class="data-row">' +
+
+            "<strong>" +
+            label +
+            "</strong>" +
+
+            "<span>" +
+            value +
+            "</span>" +
+
+            "</div>";
     });
+
 
     info.innerHTML = html;
 }
 
+
+// =========================================================
+// START
+// =========================================================
+
 loadGovernorates();
+
 </script>
 
 </body>
