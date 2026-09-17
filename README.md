@@ -17,12 +17,7 @@ The main objectives of the project are:
 ## Data Used
 * Tunisia's vegetation data `tunisia_ndvi.csv`. Source (edited): https://github.com/badIS-6/Drought-Early-Warning-System/blob/main/GEE-output/tunisia_drought_latest.csv
   
-Main indicators:
-  * NDVI
-  * NDVI anomaly
-  * Rainfall
-  * VCI
-  * VHI
+Main indicators: NDVI, NDVI anomaly, Rainfall, VCI, VHI...
     
 * OpenStreaMap as the base map to provide geographic context. Credit: https://www.openstreetmap.org/#map=6/33.87/9.29
 * Geographic boundaries of Tunisia's governorates `Tunisia_shapefiles`. Source: https://www.igismap.com/
