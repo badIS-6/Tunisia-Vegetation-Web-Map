@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tunisia Vegetation / NDVI Map</title>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #header {
+            height: 70px;
+            background: #ffffff;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            z-index: 1000;
+        }
+
+        #header h1 {
+            margin: 0;
+            font-size: 22px;
+            color: #222;
+        }
+
+        #header p {
+            margin: 4px 0 0 18px;
+            color: #666;
+            font-size: 13px;
+        }
+
+        #map {
+            flex: 1;
+            width: 100%;
+            background: #f4f4f4;
+        }
+
+        #info-panel {
+            position: absolute;
+            top: 90px;
+            right: 20px;
+            width: 300px;
+            background: white;
+            padding: 18px;
+            border-radius: 8px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.18);
+            z-index: 1000;
+            display: none;
+        }
+
+        #info-panel h2 {
+            margin: 0 0 8px 0;
+            font-size: 20px;
+        }
+
+        #info-panel .arabic {
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 7px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: #666;
+        }
+
+        .info-value {
+            font-weight: bold;
+        }
+
+        #close-panel {
+            position: absolute;
+            right: 12px;
+            top: 8px;
+            border: none;
+            background: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #777;
+        }
+
+        .legend {
+            background: white;
+            padding: 12px;
+            border-radius: 6px;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.25);
+            line-height: 18px;
+            color: #333;
+        }
+
+        .legend-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 3px 0;
+        }
+
+        .legend-color {
+            width: 24px;
+            height: 16px;
+            margin-right: 7px;
+            border: 1px solid #aaa;
+        }
+
+        #loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 2000;
+            font-size: 15px;
+        }
+
+        #error {
+            position: absolute;
+            top: 90px;
+            left: 20px;
+            max-width: 500px;
+            background: #fff;
+            color: #b00020;
+            padding: 15px;
+            border-radius: 7px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 2000;
+            display: none;
+            white-space: pre-wrap;
+        }
+
+        .popup-title {
+            font-size: 17px;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        .popup-value {
+            font-size: 15px;
+        }
+
+        .popup-arabic {
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="header">
+        <div>
+            <h1>Tunisia Vegetation Map</h1>
+        </div>
+        <p>Governorate-level vegetation index</p>
+    </div>
+
+    <div id="map"></div>
+    <div id="loading">Loading Tunisia vegetation data...</div>
+    <div id="error"></div>
+
+    <div id="info-panel">
+        <button id="close-panel">×</button>
+        <h2 id="info-name">Governorate</h2>
+        <div id="info-arabic" class="arabic"></div>
+        <div class="info-row">
+            <span class="info-label">Governorate code</span>
+            <span class="info-value" id="info-code"></span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Date</span>
+            <span class="info-value" id="info-date"></span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Vegetation index</span>
+            <span class="info-value" id="info-vim"></span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Average vegetation</span>
+            <span class="info-value" id="info-vim-avg"></span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Vegetation quality</span>
+            <span class="info-value" id="info-viq"></span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Pixels</span>
+            <span class="info-value" id="info-pixels"></span>
+        </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        const GEOJSON_FILE = "tunisia_governorates.geojson";
+        const CSV_FILE = "tunisia_ndvi.csv";
+
+        const map = L.map("map", {
+            zoomControl: true,
+            attributionControl: false
+        });
+
+        map.setView([34.0, 9.5], 6);
+
+        let geojsonData = null;
+        let csvData = [];
+        let geojsonLayer = null;
+
+        function showError(message) {
+            const error = document.getElementById("error");
+            error.style.display = "block";
+            error.textContent = message;
+            document.getElementById("loading").style.display = "none";
+        }
+
+        function parseCSV(text) {
+            const rows = [];
+            let row = [];
+            let value = "";
+            let insideQuotes = false;
+
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                const next = text[i + 1];
+
+                if (char === '"' && insideQuotes && next === '"') {
+                    value += '"';
+                    i++;
+                    continue;
+                }
+
+                if (char === '"') {
+                    insideQuotes = !insideQuotes;
+                    continue;
+                }
+
+                if (char === "," && !insideQuotes) {
+                    row.push(value.trim());
+                    value = "";
+                    continue;
+                }
+
+                if ((char === "\n" || char === "\r") && !insideQuotes) {
+                    if (char === "\r" && next === "\n") {
+                        i++;
+                    }
+                    row.push(value.trim());
+                    value = "";
+                    if (row.some(v => v !== "")) {
+                        rows.push(row);
+                    }
+                    row = [];
+                    continue;
+                }
+
+                value += char;
+            }
+
+            if (value.length > 0 || row.length > 0) {
+                row.push(value.trim());
+                if (row.some(v => v !== "")) {
+                    rows.push(row);
+                }
+            }
+
+            if (rows.length === 0) return [];
+
+            const headers = rows[0].map(h => h.trim().toLowerCase());
+
+            return rows.slice(1).map(row => {
+                const object = {};
+                headers.forEach((header, index) => {
+                    object[header] = row[index] !== undefined ? row[index].trim() : "";
+                });
+                return object;
+            });
+        }
+
+        function parseDate(dateString) {
+            const date = new Date(dateString);
+            return isNaN(date.getTime()) ? null : date;
+        }
+
+        function getLatestRecordForGovernor(code) {
+            // Strictly filter by adm_level === '2' and matching PCODE
+            const matches = csvData.filter(row => {
+                const csvCode = String(row.pcode || "").trim().toUpperCase();
+                const admLevel = String(row.adm_level || "").trim();
+                return csvCode === code && admLevel === "2";
+            });
+
+            if (matches.length > 0) {
+                return getLatestRecord(matches);
+            }
+            return null;
+        }
+
+        function getLatestRecord(records) {
+            if (!records.length) return null;
+
+            records.sort((a, b) => {
+                const dateA = parseDate(a.date);
+                const dateB = parseDate(b.date);
+                if (!dateA || !dateB) return 0;
+                return dateB - dateA;
+            });
+
+            return records[0];
+        }
+
+        function getColor(value) {
+            if (value === null || isNaN(value)) return "#cccccc";
+
+            if (value < 0.10) return "#d73027";
+            if (value < 0.20) return "#fc8d59";
+            if (value < 0.30) return "#fee08b";
+            if (value < 0.40) return "#d9ef8b";
+            if (value < 0.50) return "#91cf60";
+            return "#1a9850";
+        }
+
+        function governorateStyle(feature) {
+            const properties = feature.properties || {};
+            const code = String(properties.gouv_id || "").trim().toUpperCase();
+            const record = getLatestRecordForGovernor(code);
+            let vim = record ? parseFloat(record.vim) : null;
+
+            return {
+                fillColor: getColor(vim),
+                weight: 1.5,
+                opacity: 1,
+                color: "#333",
+                fillOpacity: 0.75
+            };
+        }
+
+        function highlightFeature(event) {
+            const layer = event.target;
+            layer.setStyle({
+                weight: 3,
+                color: "#000",
+                fillOpacity: 0.9
+            });
+            if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+                layer.bringToFront();
+            }
+        }
+
+        function resetHighlight(event) {
+            geojsonLayer.resetStyle(event.target);
+        }
+
+        function selectGovernorate(event) {
+            const feature = event.target.feature;
+            const properties = feature.properties || {};
+            const code = String(properties.gouv_id || "").trim().toUpperCase();
+            const name = properties.gouv_fr || "Unknown";
+            const arabic = properties.gouv_ar || "";
+            const record = getLatestRecordForGovernor(code);
+
+            map.fitBounds(event.target.getBounds(), { padding: [30, 30] });
+
+            let popupHTML = `
+                <div class="popup-title">${name}</div>
+                <div class="popup-arabic">${arabic}</div>
+                <br>
+            `;
+
+            if (record) {
+                const vim = parseFloat(record.vim);
+                const vimAvg = parseFloat(record.vim_avg);
+                const viq = parseFloat(record.viq);
+
+                popupHTML += `
+                    <div class="popup-value"><b>VIM:</b> ${isNaN(vim) ? "N/A" : vim.toFixed(4)}</div>
+                    <div class="popup-value"><b>Date:</b> ${record.date}</div>
+                    <div class="popup-value"><b>VIM average:</b> ${isNaN(vimAvg) ? "N/A" : vimAvg.toFixed(4)}</div>
+                    <div class="popup-value"><b>VIQ:</b> ${isNaN(viq) ? "N/A" : viq.toFixed(2)}</div>
+                    <div class="popup-value"><b>Pixels:</b> ${record.n_pixels || "N/A"}</div>
+                `;
+            } else {
+                popupHTML += `<div>No CSV record found for this governorate.</div>`;
+            }
+
+            event.target.bindPopup(popupHTML).openPopup();
+            showInfoPanel(name, arabic, code, record);
+        }
+
+        function showInfoPanel(name, arabic, code, record) {
+            document.getElementById("info-panel").style.display = "block";
+            document.getElementById("info-name").textContent = name;
+            document.getElementById("info-arabic").textContent = arabic;
+            document.getElementById("info-code").textContent = code;
+
+            if (!record) {
+                document.getElementById("info-date").textContent = "No data";
+                document.getElementById("info-vim").textContent = "No data";
+                document.getElementById("info-vim-avg").textContent = "No data";
+                document.getElementById("info-viq").textContent = "No data";
+                document.getElementById("info-pixels").textContent = "No data";
+                return;
+            }
+
+            const vim = parseFloat(record.vim);
+            const vimAvg = parseFloat(record.vim_avg);
+            const viq = parseFloat(record.viq);
+
+            document.getElementById("info-date").textContent = record.date || "N/A";
+            document.getElementById("info-vim").textContent = isNaN(vim) ? "N/A" : vim.toFixed(4);
+            document.getElementById("info-vim-avg").textContent = isNaN(vimAvg) ? "N/A" : vimAvg.toFixed(4);
+            document.getElementById("info-viq").textContent = isNaN(viq) ? "N/A" : viq.toFixed(2);
+            document.getElementById("info-pixels").textContent = record.n_pixels || "N/A";
+        }
+
+        function onEachFeature(feature, layer) {
+            layer.on({
+                mouseover: highlightFeature,
+                mouseout: resetHighlight,
+                click: selectGovernorate
+            });
+
+            const properties = feature.properties || {};
+            const name = properties.gouv_fr || "Unknown";
+            const arabic = properties.gouv_ar || "";
+            const code = String(properties.gouv_id || "").trim().toUpperCase();
+            const record = getLatestRecordForGovernor(code);
+
+            let tooltipText = `<b>${name}</b>`;
+            if (arabic) tooltipText += `<br>${arabic}`;
+            if (record) {
+                const vim = parseFloat(record.vim);
+                if (!isNaN(vim)) tooltipText += `<br>VIM: ${vim.toFixed(3)}`;
+            }
+
+            layer.bindTooltip(tooltipText, { sticky: true });
+        }
+
+        function createGeoJSONLayer() {
+            geojsonLayer = L.geoJSON(geojsonData, {
+                style: governorateStyle,
+                onEachFeature: onEachFeature
+            }).addTo(map);
+
+            map.fitBounds(geojsonLayer.getBounds(), { padding: [20, 20] });
+        }
+
+        const legend = L.control({ position: "bottomright" });
+        legend.onAdd = function() {
+            const div = L.DomUtil.create("div", "legend");
+            div.innerHTML = `
+                <div class="legend-title">Vegetation index</div>
+                <div class="legend-item"><div class="legend-color" style="background:#d73027"></div>&lt; 0.10</div>
+                <div class="legend-item"><div class="legend-color" style="background:#fc8d59"></div>0.10 – 0.20</div>
+                <div class="legend-item"><div class="legend-color" style="background:#fee08b"></div>0.20 – 0.30</div>
+                <div class="legend-item"><div class="legend-color" style="background:#d9ef8b"></div>0.30 – 0.40</div>
+                <div class="legend-item"><div class="legend-color" style="background:#91cf60"></div>0.40 – 0.50</div>
+                <div class="legend-item"><div class="legend-color" style="background:#1a9850"></div>&gt; 0.50</div>
+                <div class="legend-item"><div class="legend-color" style="background:#cccccc"></div>No data</div>
+            `;
+            return div;
+        };
+        legend.addTo(map);
+
+        async function loadData() {
+            try {
+                const [geojsonResponse, csvResponse] = await Promise.all([
+                    fetch(GEOJSON_FILE),
+                    fetch(CSV_FILE)
+                ]);
+
+                if (!geojsonResponse.ok) throw new Error("Could not load GeoJSON.\nHTTP status: " + geojsonResponse.status);
+                if (!csvResponse.ok) throw new Error("Could not load CSV.\nHTTP status: " + csvResponse.status);
+
+                geojsonData = await geojsonResponse.json();
+                const csvText = await csvResponse.text();
+                csvData = parseCSV(csvText);
+
+                if (!geojsonData || geojsonData.type !== "FeatureCollection") {
+                    throw new Error("The GeoJSON is not a valid FeatureCollection.");
+                }
+                if (!csvData.length) {
+                    throw new Error("The CSV contains no data rows.");
+                }
+
+                createGeoJSONLayer();
+                document.getElementById("loading").style.display = "none";
+            } catch (error) {
+                console.error(error);
+                showError("Error loading map data: " + error.message + "\n\nNote: If testing locally, run a local web server (e.g., `python3 -m http.server`) to avoid CORS restrictions.");
+            }
+        }
+
+        document.getElementById("close-panel").addEventListener("click", function() {
+            document.getElementById("info-panel").style.display = "none";
+        });
+
+        loadData();
+    </script>
+</body>
+</html>
