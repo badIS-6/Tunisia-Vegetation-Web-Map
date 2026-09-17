@@ -1,6 +1,6 @@
 # Tunisia Vegetation Web Map
 
-The **Tunisia Drought Early Warning System** is an interactive **web map** designed to provide a geographic visualization of Tunisia's vegetation.
+This is an interactive **web map** designed to provide a geographic visualization of Tunisia's vegetation.
 
 The project uses an interactive map to display the boundaries of Tunisian governorates and allows users to select individual governorates to view their available geographic and attribute information.
 
