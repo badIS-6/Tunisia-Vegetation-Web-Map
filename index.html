@@ -1,21 +1,13 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tunisia Drought Early Warning System</title>
+    <title>Tunisia Vegetation Map</title>
     <link rel="icon" type="image/png" href="assets/icon.png">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
-    <script src="assets/chart.umd.js"></script>
-
-
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-
     <style>
         * {
             box-sizing: border-box;
@@ -229,9 +221,6 @@
         </div>
     </div>
 
-    <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
     <script>
         const GEOJSON_FILE = "tunisia_governorates.geojson";
         const CSV_FILE = "tunisia_ndvi.csv";
@@ -323,7 +312,6 @@
         }
 
         function getLatestRecordForGovernor(code) {
-            // Strictly filter by adm_level === '2' and matching PCODE
             const matches = csvData.filter(row => {
                 const csvCode = String(row.pcode || "").trim().toUpperCase();
                 const admLevel = String(row.adm_level || "").trim();
