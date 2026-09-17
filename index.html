@@ -226,7 +226,7 @@
 
     <script>
         const GEOJSON_FILE = "tunisia_governorates.geojson";
-        const CSV_FILE = "NDVI/tunisia_ndvi_fixed.csv";
+        const CSV_FILE = "tunisia_ndvi.csv";
 
         const map = L.map("map", {
             zoomControl: true,
@@ -320,7 +320,6 @@
             return isNaN(date.getTime()) ? null : date;
         }
 
-        // Updated match logic: uses the 'gouv_fr' string to join CSV and GeoJSON
         function getLatestRecordForGovernor(name) {
             if (!name) return null;
             const matches = csvData.filter(row => {
@@ -362,7 +361,7 @@
         function governorateStyle(feature) {
             const properties = feature.properties || {};
             const name = properties.gouv_fr || "Unknown";
-            const record = getLatestRecordForGovernor(name); // Join by Name
+            const record = getLatestRecordForGovernor(name);
             let vim = record ? parseFloat(record.vim) : null;
 
             return {
@@ -396,7 +395,7 @@
             const code = String(properties.gouv_id || "Unknown").trim().toUpperCase();
             const name = properties.gouv_fr || "Unknown";
             const arabic = properties.gouv_ar || "";
-            const record = getLatestRecordForGovernor(name); // Join by Name
+            const record = getLatestRecordForGovernor(name);
 
             map.fitBounds(event.target.getBounds(), { padding: [30, 30] });
 
@@ -462,7 +461,7 @@
             const properties = feature.properties || {};
             const name = properties.gouv_fr || "Unknown";
             const arabic = properties.gouv_ar || "";
-            const record = getLatestRecordForGovernor(name); // Join by Name
+            const record = getLatestRecordForGovernor(name);
 
             let tooltipText = `<b>${name}</b>`;
             if (arabic) tooltipText += `<br>${arabic}`;
