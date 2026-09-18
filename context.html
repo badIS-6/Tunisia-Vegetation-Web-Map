@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tunisia Vegetation Web Map</title>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        background: #f5f5f5;
+        color: #333;
+    }
+
+    header {
+        background: #2c3e50;
+        color: white;
+        padding: 20px;
+        text-align: center;
+    }
+
+    .container {
+        max-width: 900px;
+        margin: 30px auto;
+        background: white;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+        color: #2c3e50;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 8px;
+    }
+
+    .variable {
+        margin-bottom: 25px;
+    }
+
+    .variable h3 {
+        margin-bottom: 5px;
+        color: #34495e;
+    }
+
+    .variable p {
+        line-height: 1.6;
+        margin-top: 5px;
+    }
+
+    .back {
+        display: inline-block;
+        margin-bottom: 20px;
+        padding: 8px 14px;
+        background: #2c3e50;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+    }
+
+    .back:hover {
+        background: #1f2d3a;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+    }
+
+    th, td {
+        border: 1px solid #ddd;
+        padding: 10px;
+        text-align: left;
+    }
+
+    th {
+        background: #2c3e50;
+        color: white;
+    }
+
+    img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 6px;
+        margin-top: 15px;
+    }
+
+    ul {
+        line-height: 1.8;
+    }
+
+    code {
+        background: #eee;
+        padding: 2px 5px;
+        border-radius: 3px;
+    }
+
+    a {
+        color: #2c3e50;
+    }
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>Tunisia Vegetation Web Map</h1>
+</header>
+
+<div class="container">
+
+    <a href="index.html" class="back">← Back to Home</a>
+
+    <div class="variable">
+        <p>
+            This is an interactive <strong>web map</strong> designed to provide a geographic visualization
+            of Tunisia's vegetation.
+        </p>
+
+        <p>
+            The project uses an interactive map to display the boundaries of Tunisian governorates and
+            allows users to select individual governorates to view their available geographic and
+            attribute information.
+        </p>
+
+        <p>
+            The system provides a foundation for developing a more comprehensive drought monitoring and
+            early warning platform by combining geographic data with environmental and climatic
+            information.
+        </p>
+    </div>
+
+    <h2>Objectives</h2>
+
+    <div class="variable">
+        <ul>
+            <li>To visualize governorate-level <strong>vegetation</strong> information.</li>
+            <li>To allow users to interact with and select individual governorates.</li>
+            <li>To display available attributes for each governorate.</li>
+        </ul>
+    </div>
+
+    <h2>Data Used</h2>
+
+    <div class="variable">
+        <h3>Vegetation and Environmental Data</h3>
+        <p>
+            Tunisia's vegetation data:
+            <code>tunisia_ndvi.csv</code>
+        </p>
+
+        <p>
+            Source (edited):
+            <a href="https://github.com/badIS-6/Drought-Early-Warning-System/blob/main/GEE-output/tunisia_drought_latest.csv" target="_blank">
+                tunisia_drought_latest.csv
+            </a>
+        </p>
+
+        <p>
+            Main indicators include NDVI, NDVI anomaly, Rainfall, VCI, VHI and other environmental
+            variables. Detailed explanations are available in
+            <code>variables.html</code>.
+        </p>
+    </div>
+
+    <div class="variable">
+        <h3>Base Map</h3>
+        <p>
+            OpenStreetMap is used as the base map to provide geographic context.
+        </p>
+
+        <p>
+            Credit:
+            <a href="https://www.openstreetmap.org/#map=6/33.87/9.29" target="_blank">
+                OpenStreetMap
+            </a>
+        </p>
+    </div>
+
+    <div class="variable">
+        <h3>Governorate Boundaries</h3>
+
+        <p>
+            Geographic boundaries of Tunisia's governorates:
+            <code>Tunisia_shapefiles</code>
+        </p>
+
+        <p>
+            Source:
+            <a href="https://www.igismap.com/" target="_blank">
+                IGISMAP
+            </a>
+        </p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>File</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>Tunisia_gov.shp</code></td>
+                    <td>Contains the geographic shapes of the governorates.</td>
+                </tr>
+                <tr>
+                    <td><code>Tunisia_gov.shx</code></td>
+                    <td>Contains the spatial index of the Shapefile.</td>
+                </tr>
+                <tr>
+                    <td><code>Tunisia_gov.dbf</code></td>
+                    <td>Contains the attribute information associated with the governorates.</td>
+                </tr>
+                <tr>
+                    <td><code>Tunisia_gov.prj</code></td>
+                    <td>Contains the coordinate reference system information.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="variable">
+        <h3>Project Repository</h3>
+
+        <p>
+            The geographic data is hosted and deployed through GitHub Pages:
+        </p>
+
+        <p>
+            <a href="https://badis-6.github.io/Tunisia-Vegetation-Web-Map/" target="_blank">
+                https://badis-6.github.io/Tunisia-Vegetation-Web-Map/
+            </a>
+        </p>
+    </div>
+
+    <h2>Expected Result</h2>
+
+    <div class="variable">
+        <img src="https://github.com/user-attachments/assets/a41fc431-d753-465d-85e3-0d06da224fb6"
+             alt="Tunisia Vegetation Web Map">
+    </div>
+
+    <h2>Conclusion</h2>
+
+    <div class="variable">
+        <p>
+            This project provides an interactive geographic platform for exploring Tunisia's
+            governorates and their associated vegetation information.
+        </p>
+
+        <p>
+            It establishes the mapping component required for a larger drought monitoring platform
+            and can be further developed by integrating environmental and climatic indicators such as
+            vegetation indices, rainfall, temperature, soil moisture, and other drought-related
+            variables.
+        </p>
+    </div>
+
+    <h2>Contributors</h2>
+
+    <div class="variable">
+        <ul>
+            <li>Sarah Bouzidi</li>
+            <li>Badis Zammouri</li>
+            <li>Mohamed Chandoul</li>
+        </ul>
+
+        <p>
+            As part of a school project — <em>Web Mapping</em><br>
+            <strong>Manouba School of Engineering</strong>
+        </p>
+    </div>
+
+</div>
+
+</body>
+</html>
