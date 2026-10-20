@@ -45,4 +45,3 @@ This project provides an interactive geographic platform for exploring Tunisia's
 * Badis Zammouri
 * Mohamed Chandoul
   
-As part of a school project - Web mapping - *Manouba School of Engineering*
